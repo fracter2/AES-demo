@@ -4,7 +4,14 @@
 #include <array>
 #include <algorithm>
 
+
 using byte = unsigned char;
+using Block = std::array<byte, 16>;
+using RoundKey = Block;
+using SmallKey = Block;
+using MediumKey = std::array<byte, 24>;
+using LargeKey = std::array<byte, 32>;
+
 
 static_assert(sizeof(byte) == 1);
 
@@ -22,10 +29,3 @@ constexpr auto to_number(byte b) noexcept
 }
 
 constexpr byte bytemax = 255_b;
-
-
-using Block = std::array<byte, 16>;
-
-using KeySmall = std::array<byte, 16>;
-using KeyMedium = std::array<byte, 24>;
-using KeyLarge = std::array<byte, 32>;
