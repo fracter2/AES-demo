@@ -3,9 +3,10 @@
 #include <stdexcept>
 #include <array>
 #include <algorithm>
+#include <bit>
 
 
-using byte = unsigned char;
+using byte = unsigned char;									// TODO CONSIDER MOVING BYTE UTIL TO DEDICATED byte FILE
 using Block = std::array<byte, 16>;
 using RoundKey = Block;
 using SmallKey = Block;
@@ -29,3 +30,9 @@ constexpr auto to_number(byte b) noexcept
 }
 
 constexpr byte bytemax = 255_b;
+
+template <typename T>
+[[nodiscard]] constexpr std::array<byte, sizeof(T)> ToBytes(T data) noexcept
+{
+	return std::bit_cast<std::array<byte, sizeof(T)>>(data);
+}
