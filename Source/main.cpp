@@ -35,11 +35,7 @@ int main(void)
 {
 	try {
 		App app{};
-		while (!WindowShouldClose())
-		{
-			app.Update();
-			app.Render();
-		}
+		app.Main();
 	}
 	catch (const std::runtime_error& e) {
 		std::print("A runtime error occurred: {}", e.what());

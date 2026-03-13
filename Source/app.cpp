@@ -29,6 +29,15 @@ void App::Render() const noexcept
 	EndDrawing();
 }
 
+void App::Main()
+{
+	while (!WindowShouldClose()) {
+		Update();
+		Render();
+	}
+
+}
+
 
 
 

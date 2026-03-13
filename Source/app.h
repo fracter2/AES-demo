@@ -8,6 +8,7 @@ public:
 
 	void Update() noexcept;
 	void Render() const noexcept;
+	void Main();
 
 	App(const App&) = delete;
 	App& operator=(const App&) = delete;
