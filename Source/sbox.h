@@ -68,8 +68,8 @@ template <typename T>
 [[nodiscard]] constexpr T LookupSBoxDirectly(T data) noexcept
 {
 	using _T_bitarr = std::array<byte, sizeof(T)>;
-	//_T_bitarr* const bytes = reinterpret_cast<_T_bitarr*>(&data);
-	_T_bitarr* const bytes = &data;
+	_T_bitarr* const bytes = reinterpret_cast<_T_bitarr*>(&data);
+	//_T_bitarr* const bytes = &data;
 	for (int i = 0; i < bytes->size(); i++) {
 		(*bytes)[i] = LookupSBox((*bytes)[i]);
 	}
@@ -81,8 +81,8 @@ template <typename T>
 [[nodiscard]] constexpr T LookupSBoxInvDirectly(T data) noexcept
 {
 	using _T_bitarr = std::array<byte, sizeof(T)>;
-	//_T_bitarr* const bytes = reinterpret_cast<_T_bitarr*>(&data);
-	_T_bitarr* const bytes = &data;
+	_T_bitarr* const bytes = reinterpret_cast<_T_bitarr*>(&data);
+	//_T_bitarr* const bytes = &data;
 	for (int i = 0; i < bytes->size(); i++) {
 		(*bytes)[i] = LookupSBoxInv((*bytes)[i]);
 	}
