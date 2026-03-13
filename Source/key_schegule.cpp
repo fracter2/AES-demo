@@ -100,16 +100,27 @@ namespace {
     }
     // --
 
-
-
-    //
+    // Values taken from wiki page on AES_key_schedule
+    TEST_CASE("Key-Schegule-rcon-typicaluse") {
+        CHECK(rcon(1) == 0x01);
+        CHECK(rcon(2) == 0x02);
+        CHECK(rcon(3) == 0x04);
+        CHECK(rcon(4) == 0x08);
+        CHECK(rcon(5) == 0x10);
+        CHECK(rcon(6) == 0x20);
+        CHECK(rcon(7) == 0x40);
+        CHECK(rcon(8) == 0x80);
+        CHECK(rcon(9) == 0x1B);
+        CHECK(rcon(10) == 0x36);
+    }
+    
     constexpr Word KeyExpansionCore(Word prev, int roundIndex) noexcept
     {
         prev = SubWord(RotWord(prev));
         prev[0] ^= rcon(roundIndex);         // Since rcon always only affects the leftmost byte, this is simpler than making a whole Word for it.
         return prev;
     }
-    //SubWord(RotWord(roundKW[i-1])), rcon(i/N)
+    
 }
 
 template<typename _FromKey, int roundKeyCount>
