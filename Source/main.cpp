@@ -24,18 +24,26 @@
 // This project is an implementation of AES by Theodor Rydberg (github.com/fracter2).
 // It's my final assignment hand-in of the computer security course I am taking.
 
-#include <iostream>
-#include "raylib.h"
-#include "App.h"
 
+#include "App.h"
 #include <exception>
 #include <print>
 
-int main(void)
+#define DOCTEST_CONFIG_IMPLEMENT
+#include <doctest.h>
+
+
+int main(int argc, char** argv)
 {
+	doctest::Context context;
+	context.applyCommandLine(argc, argv);
+	int testRes = context.run();
+	if (context.shouldExit())
+		return testRes;
+	
 	try {
 		App app{};
-		app.Main();
+		app.Main();			// NOTE there's no need for app to return a value right now, so it's skipped.
 	}
 	catch (const std::runtime_error& e) {
 		std::print("A runtime error occurred: {}", e.what());
@@ -43,6 +51,9 @@ int main(void)
 	catch (const std::exception& e) {
 		std::print("an unknown exception occurred: {}", e.what());
 	}
-
-	return 0;
+	
+	return testRes;
 }
+
+
+

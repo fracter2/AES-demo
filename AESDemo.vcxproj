@@ -72,7 +72,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)External\raylib\include;$(SolutionDir)External\gsl-4.2.1</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)External\raylib\include;$(SolutionDir)External\gsl-4.2.1;$(SolutionDir)External</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)External\raylib\lib;</LibraryPath>
     <CodeAnalysisRuleSet>CppCoreCheckGslRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
@@ -142,6 +142,7 @@
     <ClCompile Include="Source\sbox.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="External\doctest.h" />
     <ClInclude Include="External\raylib\include\raylib.h" />
     <ClInclude Include="External\raylib\include\raymath.h" />
     <ClInclude Include="External\raylib\include\rlgl.h" />

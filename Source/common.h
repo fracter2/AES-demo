@@ -4,7 +4,7 @@
 #include <array>
 #include <algorithm>
 #include <bit>
-
+#include <doctest.h>
 
 using byte = unsigned char;									// TODO CONSIDER MOVING BYTE UTIL TO DEDICATED byte FILE
 using Block = std::array<byte, 16>;

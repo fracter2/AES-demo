@@ -56,6 +56,9 @@
     <ClInclude Include="Source\sbox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="External\doctest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="External\raylib\lib\raylib.dll" />
