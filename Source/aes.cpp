@@ -32,7 +32,7 @@ namespace {
 
 
 
-// TODO FIRST AES KEY SCHEGULE (key expansion) - creation of a "round key" (for each round)
+// TODO FIRST AES KEY SCHEDULE (key expansion) - creation of a "round key" (for each round)
 
 // For each block of plaintext, we do multiple rounds of multiple steps.
 // 

@@ -65,7 +65,7 @@ namespace {
         return lhs;
     }
 
-    TEST_CASE("Key-Schegule-DirectXOR") {
+    TEST_CASE("Key-Schedule-DirectXOR") {
         CHECK(DirectXOR(0_b, 0_b) == 0_b);
         CHECK(DirectXOR(0_b, 1_b) == 1_b);
         CHECK(DirectXOR(1_b, 0_b) == 1_b);
@@ -77,7 +77,7 @@ namespace {
         CHECK(DirectXOR(2_b, 3_b) == 1_b);
     }
 
-    // -- Code taken from samiam.org/key-schegule.html --
+    // -- Code taken from samiam.org/key-schedule.html --
     constexpr byte rcon(int in) noexcept                    // TODO Consider range-enforced variant (like byte)
     { 
         assert(in >= 0);
@@ -101,7 +101,7 @@ namespace {
     // --
 
     // Values taken from wiki page on AES_key_schedule
-    TEST_CASE("Key-Schegule-rcon-typicaluse") {
+    TEST_CASE("Key-Schedule-rcon-typicaluse") {
         CHECK(rcon(1) == 0x01);
         CHECK(rcon(2) == 0x02);
         CHECK(rcon(3) == 0x04);
@@ -137,7 +137,7 @@ constexpr std::array<RoundKey, roundKeyCount> CreateRoundKeys(const _FromKey& in
         rWords[i] = initKW[i];
     }
 
-    // Main key schegule loop
+    // Main key schedule loop
     for (int i = N; i < rWords.size(); i++) {
         const int roundI = i / N;
         const Word& prev = rWords[i - 1];
