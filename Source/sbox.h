@@ -89,3 +89,15 @@ template <typename T>
 
 	return data;
 }
+
+
+TEST_CASE("sbox-LookupSBoxDirectly") {
+	CHECK(LookupSBoxDirectly(0_b) == LookupSBox(0_b));
+	CHECK(LookupSBoxDirectly(1_b) == LookupSBox(1_b));
+	CHECK(LookupSBoxDirectly(255_b) == LookupSBox(255_b));
+	//CHECK(LookupSBoxDirectly(0xff) == LookupSBox(0xff));
+
+	//constexpr Word wordZero{ 0_b, 0_b, 0_b, 0_b };
+	//CHECK(LookupSBoxDirectly(wordZero) == LookupSBox(0xff));
+
+}
