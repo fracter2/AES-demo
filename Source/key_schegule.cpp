@@ -65,6 +65,18 @@ namespace {
         return lhs;
     }
 
+    TEST_CASE("Key-Schegule-DirectXOR") {
+        CHECK(DirectXOR(0_b, 0_b) == 0_b);
+        CHECK(DirectXOR(0_b, 1_b) == 1_b);
+        CHECK(DirectXOR(1_b, 0_b) == 1_b);
+        CHECK(DirectXOR(1_b, 1_b) == 0_b);
+
+        CHECK(DirectXOR(2_b, 1_b) == 3_b);
+        CHECK(DirectXOR(1_b, 2_b) == 3_b);
+        CHECK(DirectXOR(3_b, 2_b) == 1_b);
+        CHECK(DirectXOR(2_b, 3_b) == 1_b);
+    }
+
     // -- Code taken from samiam.org/key-schegule.html --
     constexpr byte rcon(int in) noexcept                    // TODO Consider range-enforced variant (like byte)
     { 
