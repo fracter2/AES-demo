@@ -50,54 +50,20 @@ constexpr byte LookupSBoxInv(byte b) noexcept
 	return sboxInv[b];
 }
 
-using Word = std::array<byte, 4>;
-
-[[nodiscard]] constexpr Word LookupSBoxWord(Word data) noexcept
+template <typename T> requires IsByteArray<T>
+[[nodiscard]] constexpr T SubBytes(T bytes) noexcept
 {
-	using _T_bitarr = std::array<byte, sizeof(Word)>;
-	//_T_bitarr* const bytes = reinterpret_cast<_T_bitarr*>(&data);
-	_T_bitarr* const bytes = &data;
-	for (int i = 0; i < bytes->size(); i++) {
-		(*bytes)[i] = LookupSBox((*bytes)[i]);
+	for (int i = 0; i < bytes.size(); i++) {
+		bytes[i] = LookupSBox(bytes[i]);
 	}
-
-	return data;
+	return bytes;
 }
 
-template <typename T>
-[[nodiscard]] constexpr T LookupSBoxDirectly(T data) noexcept
+template <typename T> requires IsByteArray<T>
+[[nodiscard]] constexpr T SubBytesInv(T bytes) noexcept
 {
-	using _T_bitarr = std::array<byte, sizeof(T)>;
-	_T_bitarr* const bytes = reinterpret_cast<_T_bitarr*>(&data);
-	//_T_bitarr* const bytes = &data;
-	for (int i = 0; i < bytes->size(); i++) {
-		(*bytes)[i] = LookupSBox((*bytes)[i]);
+	for (int i = 0; i < bytes.size(); i++) {
+		bytes[i] = LookupSBoxInv(bytes[i]);
 	}
-
-	return data;
-}
-
-template <typename T>
-[[nodiscard]] constexpr T LookupSBoxInvDirectly(T data) noexcept
-{
-	using _T_bitarr = std::array<byte, sizeof(T)>;
-	_T_bitarr* const bytes = reinterpret_cast<_T_bitarr*>(&data);
-	//_T_bitarr* const bytes = &data;
-	for (int i = 0; i < bytes->size(); i++) {
-		(*bytes)[i] = LookupSBoxInv((*bytes)[i]);
-	}
-
-	return data;
-}
-
-
-TEST_CASE("sbox-LookupSBoxDirectly") {
-	CHECK(LookupSBoxDirectly(0_b) == LookupSBox(0_b));
-	CHECK(LookupSBoxDirectly(1_b) == LookupSBox(1_b));
-	CHECK(LookupSBoxDirectly(255_b) == LookupSBox(255_b));
-	//CHECK(LookupSBoxDirectly(0xff) == LookupSBox(0xff));
-
-	//constexpr Word wordZero{ 0_b, 0_b, 0_b, 0_b };
-	//CHECK(LookupSBoxDirectly(wordZero) == LookupSBox(0xff));
-
+	return bytes;
 }

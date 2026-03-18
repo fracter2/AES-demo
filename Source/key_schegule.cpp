@@ -34,48 +34,7 @@ namespace {
         return r;
     }
 
-    constexpr Word RotWord(Word word) noexcept
-    {
-        std::rotate(word.begin(), word.begin() + 1, word.end());
-        return word;
-    }
 
-    constexpr Word SubWord(Word word) noexcept
-    {
-        return LookupSBoxDirectly<Word>(word);
-    }
-
-    constexpr Word XorWord(Word lhs, Word rhs) noexcept 
-    {
-        for (int i = 0; i < 4; i++) {
-            lhs[i] ^= rhs[i];
-        }
-        return lhs;
-    }
-
-    template<typename T> 
-    constexpr T DirectXOR(T lhs, T rhs) noexcept 
-    {
-        using _Ty = std::array<byte, sizeof(T)>;
-        _Ty* lBytes = reinterpret_cast<_Ty*>(&lhs);
-        _Ty* rBytes = reinterpret_cast<_Ty*>(&rhs);
-        for (int i = 0; i < sizeof(T); i++) {
-            (*lBytes)[i] ^= (*rBytes)[i];
-        }
-        return lhs;
-    }
-
-    TEST_CASE("Key-Schedule-DirectXOR") {
-        CHECK(DirectXOR(0_b, 0_b) == 0_b);
-        CHECK(DirectXOR(0_b, 1_b) == 1_b);
-        CHECK(DirectXOR(1_b, 0_b) == 1_b);
-        CHECK(DirectXOR(1_b, 1_b) == 0_b);
-
-        CHECK(DirectXOR(2_b, 1_b) == 3_b);
-        CHECK(DirectXOR(1_b, 2_b) == 3_b);
-        CHECK(DirectXOR(3_b, 2_b) == 1_b);
-        CHECK(DirectXOR(2_b, 3_b) == 1_b);
-    }
 
     // -- Code taken from samiam.org/key-schedule.html --
     constexpr byte rcon(int in) noexcept                    // TODO Consider range-enforced variant (like byte)
@@ -116,7 +75,7 @@ namespace {
     
     constexpr Word KeyExpansionCore(Word prev, int roundIndex) noexcept
     {
-        prev = SubWord(RotWord(prev));
+        prev = SubBytes(RotBytes(prev));
         prev[0] ^= rcon(roundIndex);         // Since rcon always only affects the leftmost byte, this is simpler than making a whole Word for it.
         return prev;
     }
@@ -142,11 +101,11 @@ constexpr std::array<RoundKey, roundKeyCount> CreateRoundKeys(const _FromKey& in
         const int roundI = i / N;
         const Word& prev = rWords[i - 1];
         if (i % N == 0)                 { rWords[i] = KeyExpansionCore(prev, roundI); }
-        else if (N > 6 && i % N == 4)   { rWords[i] = SubWord(prev); }                      // NOTE Only active for LargeKeys
+        else if (N > 6 && i % N == 4)   { rWords[i] = SubBytes(prev); }                      // NOTE Only active for LargeKeys
         else                            { rWords[i] = prev; }
 
         const Word& keyOffsetW = rWords[i - N];
-        rWords[i] = XorWord(keyOffsetW, rWords[i]);
+        rWords[i] = XorBytes(keyOffsetW, rWords[i]);
     }
 
     return std::bit_cast<rKeyArray, rWordArray>(rWords);
