@@ -111,17 +111,17 @@ constexpr std::array<RoundKey, roundKeyCount> CreateRoundKeys(const _FromKey& in
     return std::bit_cast<rKeyArray, rWordArray>(rWords);
 }
 
-std::array<RoundKey, roundKeysForSmallKey> GetRoundKeys(const SmallKey& key) noexcept
+constexpr std::array<RoundKey, roundKeysForSmallKey> GetRoundKeys(const SmallKey& key) noexcept
 {
     return CreateRoundKeys<SmallKey, roundKeysForSmallKey>(key);
 }
 
-std::array<RoundKey, roundKeysForMediumKey> GetRoundKeys(const MediumKey& key) noexcept
+constexpr std::array<RoundKey, roundKeysForMediumKey> GetRoundKeys(const MediumKey& key) noexcept
 {
     return CreateRoundKeys<MediumKey, roundKeysForMediumKey>(key);
 }
 
-std::array<RoundKey, roundKeysForLargeKey> GetRoundKeys(const LargeKey& key) noexcept
+constexpr std::array<RoundKey, roundKeysForLargeKey> GetRoundKeys(const LargeKey& key) noexcept
 {
     return CreateRoundKeys<LargeKey, roundKeysForLargeKey>(key);
 }
