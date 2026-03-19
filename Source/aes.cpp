@@ -1,15 +1,9 @@
 // aes.cpp
 
 #include "aes.h"
+#include "sbox.h"
 
 namespace {
-	
-
-
-	void SubBytes(Block& block) 
-	{
-		// TODO Substitue each byte using the S-box
-	}
 
 	void ShiftRows(Block& block) 
 	{ 
