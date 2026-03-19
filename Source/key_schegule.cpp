@@ -3,10 +3,6 @@
 #include <cassert>
 
 namespace {
-
-    // Words are 32bit (4byte) segments that make up the keys.
-    using Word = std::array<byte, 4>;
-
     template<typename T>
     concept IsWordConvertable = requires (T t) {
         sizeof(T) % sizeof(Word) != 0;
