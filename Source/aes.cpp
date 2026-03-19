@@ -52,10 +52,28 @@ namespace {
 		block = XorBytes(block, key);
 	}
 
-	
+	template <std::size_t size>
+	constexpr void EncryptBlock(Block& block, const std::array<RoundKey, size>& keys) noexcept
+	{
+		// First round only
+		AddRoundKey(block, keys[0]);
+
+		// Most rounds
+		for (int i = 1; i < (keys.size() - 1); i++) {
+			block = SubBytes(block);
+			ShiftRows(block);
+			MixColumns(block);
+			AddRoundKey(block, keys[i]);
+			
+		}
+
+		// Final round only
+		block = SubBytes(block);
+		ShiftRows(block);
+		AddRoundKey(block, keys.back());
+
+	}
 }
-
-
 
 
 // TODO FIRST AES KEY SCHEDULE (key expansion) - creation of a "round key" (for each round)
