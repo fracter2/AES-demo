@@ -1,6 +1,7 @@
 // aes.cpp
 
 #include "aes.h"
+#include "key_shegule.h"
 #include "sbox.h"
 
 namespace {
@@ -46,9 +47,9 @@ namespace {
 		}
 	}
 
-	void AddRoundkey(Block& block, const Block& key)
+	void AddRoundKey(Block& block, const RoundKey& key)
 	{
-		// TODO block XOR key, on each byte
+		block = XorBytes(block, key);
 	}
 
 	
@@ -111,10 +112,10 @@ TEST_CASE("aes-MixColumns") {
 
 }
 
-// Step 3 Mix Columns
-// matric multiplication.
-// Skipped on final round.
 
+TEST_CASE("aes-AddRoundKey") {
+	// TODO TEST CORRECT ADDING
+}
 
 // Step 4 Add Round Key
 // bitwise XOR the block with the corresponding round key
