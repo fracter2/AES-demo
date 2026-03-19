@@ -75,15 +75,32 @@ namespace {
 	}
 }
 
+constexpr std::u8string aes::Encrypt(std::u8string_view plaintext, const SmallKey& key) {
+	std::u8string ciphertext{ plaintext };
 
-// TODO FIRST AES KEY SCHEDULE (key expansion) - creation of a "round key" (for each round)
+	// NOTE: AES can only encrypt blocks of 128 bits, so uneven plaintexts are padded and unpadded
+	const int leftoverBytes = ciphertext.size() % sizeof(Block);
+	const int paddingCount = leftoverBytes == 0? 0 : sizeof(Block) - leftoverBytes;
+	for (int i = 0; i < paddingCount; i++)
+		ciphertext.push_back(char8_t(0u));
 
-// For each block of plaintext, we do multiple rounds of multiple steps.
-// 
-// First-round - Only step 4
-// Final-round - Skip step 3
+	// Encryption loop
+	const auto roundKeys = GetRoundKeys(key);
+	const int blockCount = ciphertext.size() / sizeof(Block);			// TODO Convert to Block array (for clarity)
+	Block* blocksPtr = std::bit_cast<Block*>(ciphertext.data());
+	for (int i = 0; i < blockCount; i++) {
+		Block& block = *(blocksPtr + i);
+		EncryptBlock(block, roundKeys);
+	}
 
-// Each round has these 4 steps
+	// Undo padding
+	for (int i = 0; i < paddingCount; i++)
+		ciphertext.pop_back();
+
+	return ciphertext;
+}
+
+
 TEST_CASE("aes-ShiftRows") {
 	const Block rising = { 
 		0_b, 1_b, 2_b, 3_b, 
