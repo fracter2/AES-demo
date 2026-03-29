@@ -454,7 +454,11 @@ TEST_CASE("aes-Decrypt") {
 
 TEST_CASE("aes-encrypt-then-decrypt") {
 	const SmallKey key = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
-	const std::u8string plaintext = std::u8string(u8"Introduction to Computer Security");
-	std::u8string res = aes::Encrypt(plaintext, key);
-
+	const std::u8string initialPlaintext = std::u8string(u8"Introduction to Computer Security");
+	std::u8string res = initialPlaintext;
+	aes::ApplyPKCS7Padding(res);
+	res = aes::Encrypt(res, key);
+	res = aes::Decrypt(res, key);
+	aes::RemovePKCS7Padding(res);
+	CHECK(res == initialPlaintext);
 }
