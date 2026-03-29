@@ -17,8 +17,8 @@ namespace {
 	// -- Source implementation originaly taken from wiki page of Rijndael_MixColumns --
 	constexpr Word GMixColumn(const Word& in) noexcept
 	{
-		Word b;			// is each element of the array 'a' multiplied by 2 in Rijndael's Galois field
-		unsigned char h;
+		Word b;					// is each element of the input bytes multiplied by 2 in Rijndael's Galois field
+		byte h;		// is high bit
 		for (int i = 0; i < 4; i++) {
 								/* h is set to 0x01 if the high bit of in[c] is set, 0x00 otherwise */
 			h = in[i] >> 7;		/* logical right shift, thus shifting in zeros */
@@ -26,11 +26,11 @@ namespace {
 			b[i] ^= h * 0x1B;	/* Rijndael's Galois field */
 		}
 
-		Word r;										// in[n] ^ b[n] is element n multiplied by 3 in Rijndael's Galois field
-		r[0] = b[0] ^ in[3] ^ in[2] ^ b[1] ^ in[1]; /* 2 * a0 + a3 + a2 + 3 * a1 */
-		r[1] = b[1] ^ in[0] ^ in[3] ^ b[2] ^ in[2]; /* 2 * a1 + a0 + a3 + 3 * a2 */
-		r[2] = b[2] ^ in[1] ^ in[0] ^ b[3] ^ in[3]; /* 2 * a2 + a1 + a0 + 3 * a3 */
-		r[3] = b[3] ^ in[2] ^ in[1] ^ b[0] ^ in[0]; /* 2 * a3 + a2 + a1 + 3 * a0 */
+		Word r;										// so, "b[n]" is n multiplied by 2, and "b[n] ^ in[n]" is n multiplied by 3 (in Rijndael's Galois field)
+		r[0] = b[0] ^ in[3] ^ in[2] ^ b[1] ^ in[1]; /* 2 * in0 + in3 + in2 + 3 * in1 */
+		r[1] = b[1] ^ in[0] ^ in[3] ^ b[2] ^ in[2]; /* 2 * in1 + in0 + in3 + 3 * in2 */
+		r[2] = b[2] ^ in[1] ^ in[0] ^ b[3] ^ in[3]; /* 2 * in2 + in1 + in0 + 3 * in3 */
+		r[3] = b[3] ^ in[2] ^ in[1] ^ b[0] ^ in[0]; /* 2 * in3 + in2 + in1 + 3 * in0 */
 		return r;
 	}
 	// --
