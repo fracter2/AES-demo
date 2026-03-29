@@ -8,10 +8,16 @@ namespace {
 
 	void ShiftRows(Block& block) 
 	{ 
-		// NOTE First row (0 to 4) is skipped
-		std::rotate(block.begin() + 4, block.begin() + 4 + 1, block.begin() + 8);
-		std::rotate(block.begin() + 8, block.begin() + 8 + 2, block.begin() + 12);
-		std::rotate(block.begin() + 12, block.begin() + 12 + 3, block.begin() + 16);
+		// NOTE Start at 1 since 0 doesn't do anything anyway
+		for (int i = 1; i < 4; i++) {
+			Word row = { block[i], block[i + 4], block[i + 8], block[i + 12] };
+			std::rotate(row.begin(), row.begin() + i, row.end());
+			block[i] = row[0];
+			block[i + 4] = row[1];
+			block[i + 8] = row[2];
+			block[i + 12] = row[3];
+		}
+
 	}
 
 	// -- Source implementation originaly taken from wiki page of Rijndael_MixColumns --
@@ -37,13 +43,13 @@ namespace {
 
 	void MixColumns(Block& block)
 	{
-		for (int i = 0; i < 4; i++) {
-			Word column = { block[i], block[i + 4], block[i + 8], block[i + 12] };
+		for (int i = 0; i < 16; i += 4) {
+			Word column = { block[i], block[i + 1], block[i + 2], block[i + 3] };
 			column = GMixColumn(column);
 			block[i] = column[0];
-			block[i+4] = column[1];
-			block[i+8] = column[2];
-			block[i+12] = column[3];
+			block[i+1] = column[1];
+			block[i+2] = column[2];
+			block[i+3] = column[3];
 		}
 	}
 
@@ -104,22 +110,16 @@ constexpr std::u8string aes::Encrypt(std::u8string_view plaintext, const SmallKe
 
 
 TEST_CASE("aes-ShiftRows") {
-	const Block rising = { 
-		0_b, 1_b, 2_b, 3_b, 
-		4_b, 5_b, 6_b, 7_b,
-		8_b, 9_b, 10_b, 11_b,
-		12_b, 13_b, 14_b, 15_b
+	const Block test1 = {
+		0x09, 0x08, 0x62, 0xbf, 0x6f, 0x28, 0xe3, 0x04, 0x2c, 0x74, 0x7f, 0xee, 0xda, 0x4a, 0x6a, 0x47
 	};
-	const Block risingShifted = {
-		0_b, 1_b, 2_b, 3_b,
-		5_b, 6_b, 7_b, 4_b,
-		10_b, 11_b, 8_b, 9_b,
-		15_b, 12_b, 13_b, 14_b
+	const Block test1res = {
+		0x09, 0x28, 0x7f, 0x47, 0x6f, 0x74, 0x6a, 0xbf, 0x2c, 0x4a, 0x62, 0x04, 0xda, 0x08, 0xe3, 0xee
 	};
 
-	Block temp = rising;
+	Block temp = test1;
 	ShiftRows(temp);
-	CHECK(temp == risingShifted);
+	CHECK(temp == test1res);
 }
 
 TEST_CASE("aes-GMixColumn") {	
@@ -147,7 +147,15 @@ TEST_CASE("aes-GMixColumn") {
 
 
 TEST_CASE("aes-MixColumns") {
-
+	const Block test1 = {
+		0x09, 0x28, 0x7f, 0x47, 0x6f, 0x74, 0x6a, 0xbf, 0x2c, 0x4a, 0x62, 0x04, 0xda, 0x08, 0xe3, 0xee
+	};
+	const Block test1res = {
+		0x52, 0x9f, 0x16, 0xc2, 0x97, 0x86, 0x15, 0xca, 0xe0, 0x1a, 0xae, 0x54, 0xba, 0x1a, 0x26, 0x59
+	};
+	Block temp = test1;
+	MixColumns(temp);
+	CHECK(temp == test1res);
 }
 
 
