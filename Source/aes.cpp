@@ -195,6 +195,32 @@ namespace {
 		AddRoundKey(block, keys.back());
 	}
 
+	template <std::size_t size>
+	constexpr void DecryptBlock(Block& block, const std::array<RoundKey, size>& keys) noexcept
+	{
+
+		// Final round only
+		AddRoundKey(block, keys.back());
+		ShiftRowsInverse(block);
+		block = SubBytesInv(block);
+
+		// Most rounds
+		for (int i = (keys.size() - 2); i > 0; i--) {
+			//ShiftRowsInverse(block);
+			//block = SubBytesInv(block);
+			AddRoundKey(block, keys[i]);
+			MixColumnsInverse(block);
+
+			//AddRoundKey(block, keys[i]);
+			//MixColumnsInverse(block);
+			ShiftRowsInverse(block);
+			block = SubBytesInv(block);
+		}
+
+		// First round only
+		AddRoundKey(block, keys[0]);
+	}
+
 	constexpr void ApplyPKCS7Padding(std::u8string& ciphertext) noexcept
 	{
 		const int leftoverBytes = ciphertext.size() % sizeof(Block);
@@ -223,6 +249,29 @@ constexpr std::u8string aes::Encrypt(std::u8string_view plaintext, const SmallKe
 	}
 
 	return ciphertext;
+}
+
+constexpr std::u8string aes::Decrypt(std::u8string_view ciphertext, const SmallKey& key) {
+
+	if (ciphertext.size() % sizeof(Block) != 0) {	// TODO VERIFY LENGTH OF PLAINTEXT
+		throw;
+	}
+
+	// Copy plaintext
+	std::u8string plaintext{ ciphertext };
+
+	// Encryption loop
+	const auto roundKeys = GetRoundKeys(key);
+	const int blockCount = plaintext.size() / sizeof(Block);			// TODO Convert to Block array (for clarity)
+	Block* blocksPtr = std::bit_cast<Block*>(plaintext.data());
+	for (int i = 0; i < blockCount; i++) {
+		Block& block = *(blocksPtr + i);
+		DecryptBlock(block, roundKeys);
+	}
+
+	// possible padding step here
+
+	return plaintext;
 }
 
 
@@ -350,10 +399,25 @@ TEST_CASE("aes-Encrypt") {
 	// Test values verified using https://legacy.cryptool.org/en/cto/aes-step-by-step 
 	const SmallKey key = { 0x2b, 0x7e, 0x15, 0x16, 0x28 , 0xae , 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
 	const std::u8string plaintext = { 0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a};
-	const std::u8string awnser = { 0x3a, 0xd7, 0x7b, 0xb4, 0x0d, 0x7a, 0x36, 0x60, 0xa8, 0x9e, 0xca, 0xf3, 0x24, 0x66, 0xef, 0x97 };
-	std::u8string cipher = aes::Encrypt(plaintext, key);
-	CHECK(cipher.size() == sizeof(Block));
-	CHECK(cipher == awnser);
+	const std::u8string expectedCiphertext = { 0x3a, 0xd7, 0x7b, 0xb4, 0x0d, 0x7a, 0x36, 0x60, 0xa8, 0x9e, 0xca, 0xf3, 0x24, 0x66, 0xef, 0x97 };
+	std::u8string res = aes::Encrypt(plaintext, key);
+	CHECK(res.size() == sizeof(Block));
+	CHECK(res == expectedCiphertext);
 }
 
+TEST_CASE("aes-Decrypt") {
+	// Test values verified using https://legacy.cryptool.org/en/cto/aes-step-by-step 
+	const SmallKey key =					{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
+	const std::u8string ciphertext =		{ 0xc7, 0xd1, 0x24, 0x19, 0x48, 0x9e, 0x3b, 0x62, 0x33, 0xa2, 0xc5, 0xa7, 0xf4, 0x56, 0x31, 0x72, };
+	const std::u8string expectedPlaintext = { 0x00, 0x00, 0x01, 0x01, 0x03, 0x03, 0x07, 0x07, 0x0f, 0x0f, 0x1f, 0x1f, 0x3f, 0x3f, 0x7f, 0x7f };
+	std::u8string res = aes::Decrypt(ciphertext, key);
+	CHECK(res.size() == sizeof(Block));
+	CHECK(res == expectedPlaintext);
+}
 
+TEST_CASE("aes-encrypt-then-decrypt") {
+	const SmallKey key = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
+	const std::u8string plaintext = std::u8string(u8"Introduction to Computer Security");
+	std::u8string res = aes::Encrypt(plaintext, key);
+
+}
