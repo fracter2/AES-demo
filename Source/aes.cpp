@@ -71,18 +71,24 @@ namespace {
 		block = SubBytes(block);
 		ShiftRows(block);
 		AddRoundKey(block, keys.back());
+	}
 
+	constexpr void ApplyPKCS7Padding(std::u8string& ciphertext) noexcept
+	{
+		const int leftoverBytes = ciphertext.size() % sizeof(Block);
+		const int paddingCount = sizeof(Block) - leftoverBytes;			// NOTE This will guarantee 1 to sizeof(block) bytes are padded
+		const char8_t padChar = static_cast<char8_t>(paddingCount);		// NOTE The padded bytes are always just the pad length
+		for (int i = 0; i < paddingCount; i++)
+			ciphertext.push_back(padChar);
 	}
 }
 
 constexpr std::u8string aes::Encrypt(std::u8string_view plaintext, const SmallKey& key) {
+	// Copy plaintext
 	std::u8string ciphertext{ plaintext };
 
-	// NOTE: AES can only encrypt blocks of 128 bits, so uneven plaintexts are padded and unpadded
-	const int leftoverBytes = ciphertext.size() % sizeof(Block);
-	const int paddingCount = leftoverBytes == 0? 0 : sizeof(Block) - leftoverBytes;
-	for (int i = 0; i < paddingCount; i++)
-		ciphertext.push_back(char8_t(0u));
+	// AES can only encrypt blocks of 128 bits, so we use PKCS7 padding to make it the right length.
+	ApplyPKCS7Padding(ciphertext);
 
 	// Encryption loop
 	const auto roundKeys = GetRoundKeys(key);
@@ -92,10 +98,6 @@ constexpr std::u8string aes::Encrypt(std::u8string_view plaintext, const SmallKe
 		Block& block = *(blocksPtr + i);
 		EncryptBlock(block, roundKeys);
 	}
-
-	// Undo padding
-	for (int i = 0; i < paddingCount; i++)
-		ciphertext.pop_back();
 
 	return ciphertext;
 }
@@ -152,5 +154,42 @@ TEST_CASE("aes-AddRoundKey") {
 	// TODO TEST CORRECT ADDING
 }
 
-// Step 4 Add Round Key
-// bitwise XOR the block with the corresponding round key
+
+TEST_CASE("aes-ApplyPKCS7Padding") {
+	SUBCASE("Fill Remainder 1") {
+		std::u8string test = std::u8string(sizeof(Block) - 1, 0_b);
+		ApplyPKCS7Padding(test);
+		CHECK(test.size()	== sizeof(Block));
+		CHECK(test.front()	== 0_b);
+		CHECK(test.back()	== 1);
+	}
+
+	SUBCASE("Fill Remainder 2") {
+		std::u8string test = std::u8string(sizeof(Block) - 2, 0_b);
+		ApplyPKCS7Padding(test);
+		CHECK(test.size()	== sizeof(Block));
+		CHECK(test.front()	== 0_b);
+		CHECK(test.back()	== 2);
+	}
+
+	SUBCASE("Fill Single Byte") {
+		std::u8string test = std::u8string(1, 0_b);
+		ApplyPKCS7Padding(test);
+		CHECK(test.size()	== sizeof(Block));
+		CHECK(test.front()	== 0_b);
+		CHECK(test[2]		== sizeof(Block) - 1);
+		CHECK(test.back()	== sizeof(Block) - 1);
+	}
+
+	SUBCASE("Append Full Block") {
+		std::u8string test = std::u8string(sizeof(Block), 0_b);
+		ApplyPKCS7Padding(test);
+		CHECK(test.size()				== 2 * sizeof(Block));
+		CHECK(test.front()				== 0_b);
+		CHECK(test[sizeof(Block) - 1]	== 0_b);
+		CHECK(test[sizeof(Block)]		== sizeof(Block));
+		CHECK(test.back()				== sizeof(Block));
+	}
+
+}
+
