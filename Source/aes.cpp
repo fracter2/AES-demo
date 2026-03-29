@@ -89,12 +89,13 @@ namespace {
 	}
 }
 
+// Get the ciphertext of the given plaintext, using AES in ECB mode with PKCS7 Padding.
 constexpr std::u8string aes::Encrypt(std::u8string_view plaintext, const SmallKey& key) {
 	// Copy plaintext
 	std::u8string ciphertext{ plaintext };
 
 	// AES can only encrypt blocks of 128 bits, so we use PKCS7 padding to make it the right length.
-	ApplyPKCS7Padding(ciphertext);
+	//ApplyPKCS7Padding(ciphertext);
 
 	// Encryption loop
 	const auto roundKeys = GetRoundKeys(key);
