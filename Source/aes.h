@@ -13,6 +13,7 @@
 namespace aes {
 	constexpr std::u8string Encrypt(std::u8string_view plaintext, const SmallKey& key);
 	constexpr std::u8string Decrypt(std::u8string_view ciphertext, const SmallKey& key);
+	constexpr void ApplyPKCS7Padding(std::u8string& plaintext) noexcept;
 }
 
 

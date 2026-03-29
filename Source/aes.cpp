@@ -220,15 +220,6 @@ namespace {
 		// First round only
 		AddRoundKey(block, keys[0]);
 	}
-
-	constexpr void ApplyPKCS7Padding(std::u8string& ciphertext) noexcept
-	{
-		const int leftoverBytes = ciphertext.size() % sizeof(Block);
-		const int paddingCount = sizeof(Block) - leftoverBytes;			// NOTE This will guarantee 1 to sizeof(block) bytes are padded
-		const char8_t padChar = static_cast<char8_t>(paddingCount);		// NOTE The padded bytes are always just the pad length
-		for (int i = 0; i < paddingCount; i++)
-			ciphertext.push_back(padChar);
-	}
 }
 
 // Get the ciphertext of the given plaintext, using AES in ECB mode with PKCS7 Padding.
@@ -274,6 +265,14 @@ constexpr std::u8string aes::Decrypt(std::u8string_view ciphertext, const SmallK
 	return plaintext;
 }
 
+constexpr void aes::ApplyPKCS7Padding(std::u8string& plaintext) noexcept
+{
+	const int leftoverBytes = plaintext.size() % sizeof(Block);
+	const int paddingCount = sizeof(Block) - leftoverBytes;			// NOTE This will guarantee 1 to sizeof(block) bytes are padded
+	const char8_t padChar = static_cast<char8_t>(paddingCount);		// NOTE The padded bytes are always just the pad length
+	for (int i = 0; i < paddingCount; i++)
+		plaintext.push_back(padChar);
+}
 
 TEST_CASE("aes-ShiftRows") {
 	const Block test1 = {
@@ -358,7 +357,7 @@ TEST_CASE("aes-AddRoundKey") {
 TEST_CASE("aes-ApplyPKCS7Padding") {
 	SUBCASE("Fill Remainder 1") {
 		std::u8string test = std::u8string(sizeof(Block) - 1, 0_b);
-		ApplyPKCS7Padding(test);
+		aes::ApplyPKCS7Padding(test);
 		CHECK(test.size()	== sizeof(Block));
 		CHECK(test.front()	== 0_b);
 		CHECK(test.back()	== 1);
@@ -366,7 +365,7 @@ TEST_CASE("aes-ApplyPKCS7Padding") {
 
 	SUBCASE("Fill Remainder 2") {
 		std::u8string test = std::u8string(sizeof(Block) - 2, 0_b);
-		ApplyPKCS7Padding(test);
+		aes::ApplyPKCS7Padding(test);
 		CHECK(test.size()	== sizeof(Block));
 		CHECK(test.front()	== 0_b);
 		CHECK(test.back()	== 2);
@@ -374,7 +373,7 @@ TEST_CASE("aes-ApplyPKCS7Padding") {
 
 	SUBCASE("Fill Single Byte") {
 		std::u8string test = std::u8string(1, 0_b);
-		ApplyPKCS7Padding(test);
+		aes::ApplyPKCS7Padding(test);
 		CHECK(test.size()	== sizeof(Block));
 		CHECK(test.front()	== 0_b);
 		CHECK(test[2]		== sizeof(Block) - 1);
@@ -383,7 +382,7 @@ TEST_CASE("aes-ApplyPKCS7Padding") {
 
 	SUBCASE("Append Full Block") {
 		std::u8string test = std::u8string(sizeof(Block), 0_b);
-		ApplyPKCS7Padding(test);
+		aes::ApplyPKCS7Padding(test);
 		CHECK(test.size()				== 2 * sizeof(Block));
 		CHECK(test.front()				== 0_b);
 		CHECK(test[sizeof(Block) - 1]	== 0_b);
