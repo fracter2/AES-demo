@@ -122,7 +122,8 @@ TEST_CASE("aes-ShiftRows") {
 	CHECK(temp == risingShifted);
 }
 
-TEST_CASE("aes-GMixColumn") {
+TEST_CASE("aes-GMixColumn") {	
+	// -- Source test values originaly taken from wiki page of Rijndael_MixColumns --
 	const Word test1 =		{ 99, 71, 162, 240 };
 	const Word test1res =	{ 93, 224, 112, 187 };
 	const Word test2 =		{ 242, 10, 34, 92 };
