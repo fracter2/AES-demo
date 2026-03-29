@@ -274,6 +274,30 @@ constexpr void aes::ApplyPKCS7Padding(std::u8string& plaintext) noexcept
 		plaintext.push_back(padChar);
 }
 
+// Removes padding by checking the last byte value. WANRNING, does not verify it was actually padded correctly.
+constexpr void aes::RemovePKCS7Padding(std::u8string& plaintext)
+{
+	// TODO ADD MORE SPECIFIC EXCEPTIONS
+
+	if (plaintext.empty()) throw;
+	if (plaintext.size() % sizeof(Block) != 0) throw;
+	
+	// Make sure it can actually unpadd properly
+	const int paddingCount = plaintext.back();
+	if (plaintext.size() <= paddingCount) throw;
+	if (sizeof(Block)	 < paddingCount) throw;
+
+	// Each padding byte must be the very same
+	for (int i = 1; i <= paddingCount; i++)
+		if (plaintext[plaintext.size() - i] != paddingCount)
+			throw;
+
+	// Actually unpadd
+	for (int i = 0; i < paddingCount; i++)
+		plaintext.pop_back();
+}
+
+
 TEST_CASE("aes-ShiftRows") {
 	const Block test1 = {
 		0x09, 0x08, 0x62, 0xbf, 0x6f, 0x28, 0xe3, 0x04, 0x2c, 0x74, 0x7f, 0xee, 0xda, 0x4a, 0x6a, 0x47
@@ -354,13 +378,17 @@ TEST_CASE("aes-AddRoundKey") {
 }
 
 
-TEST_CASE("aes-ApplyPKCS7Padding") {
+TEST_CASE("aes-ApplyRemovePKCS7Padding") {
 	SUBCASE("Fill Remainder 1") {
 		std::u8string test = std::u8string(sizeof(Block) - 1, 0_b);
 		aes::ApplyPKCS7Padding(test);
 		CHECK(test.size()	== sizeof(Block));
 		CHECK(test.front()	== 0_b);
 		CHECK(test.back()	== 1);
+		SUBCASE("Undo") {
+			aes::RemovePKCS7Padding(test);
+			CHECK(test == std::u8string(sizeof(Block) - 1, 0_b));
+		}
 	}
 
 	SUBCASE("Fill Remainder 2") {
@@ -369,6 +397,10 @@ TEST_CASE("aes-ApplyPKCS7Padding") {
 		CHECK(test.size()	== sizeof(Block));
 		CHECK(test.front()	== 0_b);
 		CHECK(test.back()	== 2);
+		SUBCASE("Undo") {
+			aes::RemovePKCS7Padding(test);
+			CHECK(test == std::u8string(sizeof(Block) - 2, 0_b));
+		}
 	}
 
 	SUBCASE("Fill Single Byte") {
@@ -378,6 +410,10 @@ TEST_CASE("aes-ApplyPKCS7Padding") {
 		CHECK(test.front()	== 0_b);
 		CHECK(test[2]		== sizeof(Block) - 1);
 		CHECK(test.back()	== sizeof(Block) - 1);
+		SUBCASE("Undo") {
+			aes::RemovePKCS7Padding(test);
+			CHECK(test == std::u8string(1, 0_b));
+		}
 	}
 
 	SUBCASE("Append Full Block") {
@@ -388,11 +424,13 @@ TEST_CASE("aes-ApplyPKCS7Padding") {
 		CHECK(test[sizeof(Block) - 1]	== 0_b);
 		CHECK(test[sizeof(Block)]		== sizeof(Block));
 		CHECK(test.back()				== sizeof(Block));
+		SUBCASE("Undo") {
+			aes::RemovePKCS7Padding(test);
+			CHECK(test == std::u8string(sizeof(Block), 0_b));
+		}
 	}
 
 }
-//template <size_t size>
-//consteval std::array<byte, size> byteFromStrLiteral()
 
 TEST_CASE("aes-Encrypt") {
 	// Test values verified using https://legacy.cryptool.org/en/cto/aes-step-by-step 
