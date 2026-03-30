@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 
 	// Demo
 	const SmallKey key = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, };
-	const std::string initialPlaintext = std::string("Introduction to Computer Security");
+	const std::string initialPlaintext = { "Introduction to Computer Security" };
 	std::println("Input plaintext: {}", initialPlaintext);
 
 	// The encryption mode is ECB (block-by-block). Input is padded according to PKCS7 (for valid 16B blocks).
@@ -50,11 +50,8 @@ int main(int argc, char** argv)
 	std::println("After encryption: {}", res);
 
 	res = aes::DecryptRange(res, key);
-	std::println("Decrypted ciphertext: {}", res);
-
-	std::string resStr = { std::bit_cast<char*>(res.data()) };
-	std::println("Final output: {}", res);
-	
+	std::string resStr(res.begin(), res.end());
+	std::println("Final output: {}", resStr);
 
 	return testRes;
 }
