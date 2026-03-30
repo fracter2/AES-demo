@@ -22,7 +22,6 @@
 ********************************************************************************************/
 
 // This project is an implementation of AES by Theodor Rydberg (github.com/fracter2).
-// It's my final assignment hand-in of the computer security course I am taking.
 
 
 #include "aes.h"
@@ -34,16 +33,19 @@
 
 int main(int argc, char** argv)
 {
+	// Doctest boilerplate
 	doctest::Context context;
 	context.applyCommandLine(argc, argv);
 	int testRes = context.run();
 	if (context.shouldExit())
 		return testRes;
 
+	// Demo
 	const SmallKey key = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, };
 	const std::string initialPlaintext = std::string("Introduction to Computer Security");
 	std::println("Input plaintext: {}", initialPlaintext);
 
+	// The encryption mode is ECB (block-by-block). Input is padded according to PKCS7 (for valid 16B blocks).
 	std::vector<byte> res = aes::EncryptRange(initialPlaintext, key);
 	std::println("After encryption: {}", res);
 

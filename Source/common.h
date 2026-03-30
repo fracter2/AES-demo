@@ -8,6 +8,7 @@
 #include <concepts>
 #include <ranges>
 
+
 using byte = unsigned char;									// TODO CONSIDER MOVING BYTE UTIL TO DEDICATED byte FILE
 using Word = std::array<byte, 4>;
 using Block = std::array<byte, 16>;
@@ -15,7 +16,6 @@ using RoundKey = Block;
 using SmallKey = Block;
 using MediumKey = std::array<byte, 24>;
 using LargeKey = std::array<byte, 32>;
-
 
 consteval auto operator""_b(unsigned long long int value)
 {
@@ -55,6 +55,10 @@ template <typename T>
     return *std::bit_cast<std::array<byte, sizeof(T)>*>(&data);
 }
 
+//
+// ---- BYTE OPERATIONS ----
+//
+
 template <typename T> requires IsByteArray<T>
 [[nodiscard]] constexpr T RotBytes(T bytes) noexcept
 {
@@ -62,7 +66,7 @@ template <typename T> requires IsByteArray<T>
     return bytes;
 }
 
-template <typename T> requires IsByteArray<T> 
+template <typename T> requires IsByteArray<T>
 [[nodiscard]] constexpr T XorBytes(T lhs, const T& rhs) noexcept
 {
     for (int i = 0; i < sizeof(lhs); i++) {
@@ -70,6 +74,10 @@ template <typename T> requires IsByteArray<T>
     }
     return lhs;
 }
+
+//
+// ---- TESTS ----
+//
 
 TEST_CASE("common-XorBytes") {
     const std::array<byte, 4> zero{ 0_b, 0_b, 0_b, 0_b };

@@ -35,7 +35,6 @@ void App::Main()
 		Update();
 		Render();
 	}
-
 }
 
 

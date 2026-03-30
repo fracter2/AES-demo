@@ -55,7 +55,7 @@ namespace {
     }
     // --
 
-    // Values taken from wiki page on AES_key_schedule
+    // Test values taken from wiki page on AES_key_schedule
     TEST_CASE("Key-Schedule-rcon-typicaluse") {
         CHECK(rcon(1) == 0x01);
         CHECK(rcon(2) == 0x02);
