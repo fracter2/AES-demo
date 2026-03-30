@@ -4,14 +4,7 @@
 #include "key_shegule.h"
 
 #include <string>
-#include <string_view>
 #include <vector>
-
-// TODO func for getting sized keys from arbituary key
-
-
-// TODO encrypt funcs taking small(16bytes), medium(24bytes), or large(32bytes) keys. + plaintext stringview
-// TODO Vice versa for decryption, returning... pointer to cipher text?
 
 namespace aes {
 	constexpr void ShiftRows(Block& block) noexcept;
@@ -69,6 +62,8 @@ namespace aes {
 		requires std::ranges::contiguous_range<T>;
 		{ t.size() } -> std::same_as<std::size_t>;
 	};
+	static_assert(IsSequenceContainer<std::vector<byte>>);
+	static_assert(IsSequenceContainer<std::u8string>);
 
 	// Get the ciphertext of the given byte sequence, using AES in ECB mode with PKCS7 Padding.
 	template <IsSequenceContainer T>

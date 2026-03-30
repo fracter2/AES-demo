@@ -139,7 +139,6 @@
     <ClCompile Include="Source\app.cpp" />
     <ClCompile Include="Source\key_schegule.cpp" />
     <ClCompile Include="Source\main.cpp" />
-    <ClCompile Include="Source\sbox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="External\doctest.h" />
@@ -149,6 +148,7 @@
     <ClInclude Include="Source\aes.h" />
     <ClInclude Include="Source\app.h" />
     <ClInclude Include="Source\common.h" />
+    <ClInclude Include="Source\gmix.h" />
     <ClInclude Include="Source\key_shegule.h" />
     <ClInclude Include="Source\sbox.h" />
   </ItemGroup>
