@@ -51,7 +51,7 @@ constexpr byte LookupSBoxInv(byte b) noexcept
 }
 
 template <typename T> requires IsByteArray<T>
-[[nodiscard]] constexpr T SubBytes(T bytes) noexcept
+[[nodiscard]] constexpr T LookupSBoxRange(T bytes) noexcept
 {
 	for (int i = 0; i < bytes.size(); i++) {
 		bytes[i] = LookupSBox(bytes[i]);
@@ -60,7 +60,7 @@ template <typename T> requires IsByteArray<T>
 }
 
 template <typename T> requires IsByteArray<T>
-[[nodiscard]] constexpr T SubBytesInv(T bytes) noexcept
+[[nodiscard]] constexpr T LookupSBoxInvRange(T bytes) noexcept
 {
 	for (int i = 0; i < bytes.size(); i++) {
 		bytes[i] = LookupSBoxInv(bytes[i]);

@@ -25,8 +25,7 @@
 // It's my final assignment hand-in of the computer security course I am taking.
 
 
-#include "App.h"
-#include <exception>
+#include "aes.h"
 #include <print>
 
 #define DOCTEST_CONFIG_IMPLEMENT
@@ -40,18 +39,21 @@ int main(int argc, char** argv)
 	int testRes = context.run();
 	if (context.shouldExit())
 		return testRes;
+
+	const SmallKey key = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, };
+	const std::string initialPlaintext = std::string("Introduction to Computer Security");
+	std::println("Input plaintext: {}", initialPlaintext);
+
+	std::vector<byte> res = aes::EncryptRange(initialPlaintext, key);
+	std::println("After encryption: {}", res);
+
+	res = aes::DecryptRange(res, key);
+	std::println("Decrypted ciphertext: {}", res);
+
+	std::string resStr = { std::bit_cast<char*>(res.data()) };
+	std::println("Final output: {}", res);
 	
-	try {
-		App app{};
-		app.Main();			// NOTE there's no need for app to return a value right now, so it's skipped.
-	}
-	catch (const std::runtime_error& e) {
-		std::print("A runtime error occurred: {}", e.what());
-	}
-	catch (const std::exception& e) {
-		std::print("an unknown exception occurred: {}", e.what());
-	}
-	
+
 	return testRes;
 }
 

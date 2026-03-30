@@ -1,39 +1,9 @@
 // aes.cpp
 
 #include "aes.h"
-#include "key_shegule.h"
 #include "sbox.h"
 
 namespace {
-
-	void ShiftRows(Block& block) 
-	{ 
-		// NOTE Start at 1 since 0 doesn't do anything anyway
-		for (int i = 1; i < 4; i++) {
-			Word row = { block[i], block[i + 4], block[i + 8], block[i + 12] };
-			std::rotate(row.begin(), row.begin() + i, row.end());
-			block[i] = row[0];
-			block[i + 4] = row[1];
-			block[i + 8] = row[2];
-			block[i + 12] = row[3];
-		}
-
-	}
-
-	void ShiftRowsInverse(Block& block)
-	{
-		// NOTE Start at 1 since 0 doesn't do anything anyway
-		for (int i = 1; i < 4; i++) {
-			Word row = { block[i], block[i + 4], block[i + 8], block[i + 12] };
-			std::rotate(row.begin(), row.begin() + (4 - i), row.end());
-			block[i] = row[0];
-			block[i + 4] = row[1];
-			block[i + 8] = row[2];
-			block[i + 12] = row[3];
-		}
-
-	}
-
 	// -- Source implementation originaly taken from wiki page of Rijndael_MixColumns --
 	constexpr Word GMixColumn(const Word& in) noexcept
 	{
@@ -143,149 +113,96 @@ namespace {
 	}
 
 	// --
+}
 
-
-	void MixColumns(Block& block)
-	{
-		for (int i = 0; i < 16; i += 4) {
-			Word column = { block[i], block[i + 1], block[i + 2], block[i + 3] };
-			column = GMixColumn(column);
-			block[i] = column[0];
-			block[i+1] = column[1];
-			block[i+2] = column[2];
-			block[i+3] = column[3];
-		}
+constexpr void aes::ShiftRows(Block& block) noexcept
+{
+	// NOTE Start at 1 since 0 doesn't do anything anyway
+	for (int i = 1; i < 4; i++) {
+		Word row = { block[i], block[i + 4], block[i + 8], block[i + 12] };
+		std::rotate(row.begin(), row.begin() + i, row.end());
+		block[i] = row[0];
+		block[i + 4] = row[1];
+		block[i + 8] = row[2];
+		block[i + 12] = row[3];
 	}
 
-	void MixColumnsInverse(Block& block)
-	{
-		for (int i = 0; i < 16; i += 4) {
-			Word column = { block[i], block[i + 1], block[i + 2], block[i + 3] };
-			column = GMixColumnInverse(column);
-			block[i] = column[0];
-			block[i + 1] = column[1];
-			block[i + 2] = column[2];
-			block[i + 3] = column[3];
-		}
+}
+
+constexpr void aes::ShiftRowsInverse(Block& block) noexcept
+{
+	// NOTE Start at 1 since 0 doesn't do anything anyway
+	for (int i = 1; i < 4; i++) {
+		Word row = { block[i], block[i + 4], block[i + 8], block[i + 12] };
+		std::rotate(row.begin(), row.begin() + (4 - i), row.end());
+		block[i] = row[0];
+		block[i + 4] = row[1];
+		block[i + 8] = row[2];
+		block[i + 12] = row[3];
 	}
 
-	void AddRoundKey(Block& block, const RoundKey& key)
-	{
-		block = XorBytes(block, key);
-	}
+}
 
-	template <std::size_t size>
-	constexpr void EncryptBlock(Block& block, const std::array<RoundKey, size>& keys) noexcept
-	{
-		// First round only
-		AddRoundKey(block, keys[0]);
-
-		// Most rounds
-		for (int i = 1; i < (keys.size() - 1); i++) {
-			block = SubBytes(block);
-			ShiftRows(block);
-			MixColumns(block);
-			AddRoundKey(block, keys[i]);
-			
-		}
-
-		// Final round only
-		block = SubBytes(block);
-		ShiftRows(block);
-		AddRoundKey(block, keys.back());
-	}
-
-	template <std::size_t size>
-	constexpr void DecryptBlock(Block& block, const std::array<RoundKey, size>& keys) noexcept
-	{
-
-		// Final round only
-		AddRoundKey(block, keys.back());
-		ShiftRowsInverse(block);
-		block = SubBytesInv(block);
-
-		// Most rounds
-		for (int i = (keys.size() - 2); i > 0; i--) {
-			//ShiftRowsInverse(block);
-			//block = SubBytesInv(block);
-			AddRoundKey(block, keys[i]);
-			MixColumnsInverse(block);
-
-			//AddRoundKey(block, keys[i]);
-			//MixColumnsInverse(block);
-			ShiftRowsInverse(block);
-			block = SubBytesInv(block);
-		}
-
-		// First round only
-		AddRoundKey(block, keys[0]);
+constexpr void aes::MixColumns(Block& block) noexcept
+{
+	for (int i = 0; i < 16; i += 4) {
+		Word column = { block[i], block[i + 1], block[i + 2], block[i + 3] };
+		column = GMixColumn(column);
+		block[i] = column[0];
+		block[i + 1] = column[1];
+		block[i + 2] = column[2];
+		block[i + 3] = column[3];
 	}
 }
 
-// Get the ciphertext of the given plaintext, using AES in ECB mode with PKCS7 Padding.
-constexpr std::u8string aes::Encrypt(std::u8string_view plaintext, const SmallKey& key) {
-	// Copy plaintext
-	std::u8string ciphertext{ plaintext };
-
-	// AES can only encrypt blocks of 128 bits, so we use PKCS7 padding to make it the right length.
-	//ApplyPKCS7Padding(ciphertext);
-
-	// Encryption loop
-	const auto roundKeys = GetRoundKeys(key);
-	const int blockCount = ciphertext.size() / sizeof(Block);			// TODO Convert to Block array (for clarity)
-	Block* blocksPtr = std::bit_cast<Block*>(ciphertext.data());
-	for (int i = 0; i < blockCount; i++) {
-		Block& block = *(blocksPtr + i);
-		EncryptBlock(block, roundKeys);
+constexpr void aes::MixColumnsInverse(Block& block) noexcept
+{
+	for (int i = 0; i < 16; i += 4) {
+		Word column = { block[i], block[i + 1], block[i + 2], block[i + 3] };
+		column = GMixColumnInverse(column);
+		block[i] = column[0];
+		block[i + 1] = column[1];
+		block[i + 2] = column[2];
+		block[i + 3] = column[3];
 	}
-
-	return ciphertext;
 }
 
-constexpr std::u8string aes::Decrypt(std::u8string_view ciphertext, const SmallKey& key) {
-
-	if (ciphertext.size() % sizeof(Block) != 0) {	// TODO VERIFY LENGTH OF PLAINTEXT
-		throw;
-	}
-
-	// Copy plaintext
-	std::u8string plaintext{ ciphertext };
-
-	// Encryption loop
-	const auto roundKeys = GetRoundKeys(key);
-	const int blockCount = plaintext.size() / sizeof(Block);			// TODO Convert to Block array (for clarity)
-	Block* blocksPtr = std::bit_cast<Block*>(plaintext.data());
-	for (int i = 0; i < blockCount; i++) {
-		Block& block = *(blocksPtr + i);
-		DecryptBlock(block, roundKeys);
-	}
-
-	// possible padding step here
-
-	return plaintext;
+constexpr void aes::SubBytes(Block& block) noexcept
+{
+	block = LookupSBoxRange(block);
 }
 
-constexpr void aes::ApplyPKCS7Padding(std::u8string& plaintext) noexcept
+constexpr void aes::SubBytesInverse(Block& block) noexcept
+{
+	block = LookupSBoxInvRange(block);
+}
+
+constexpr void aes::AddRoundKey(Block& block, const RoundKey& key) noexcept
+{
+	block = XorBytes(block, key);
+}
+
+// Applies padding to reach full Block intervals, using the PKCS7 protocol. Always increases size by at least 1 byte.
+constexpr void aes::ApplyPadding(std::vector<byte>& plaintext)
 {
 	const int leftoverBytes = plaintext.size() % sizeof(Block);
-	const int paddingCount = sizeof(Block) - leftoverBytes;			// NOTE This will guarantee 1 to sizeof(block) bytes are padded
-	const char8_t padChar = static_cast<char8_t>(paddingCount);		// NOTE The padded bytes are always just the pad length
-	for (int i = 0; i < paddingCount; i++)
-		plaintext.push_back(padChar);
+	const byte paddingCount = static_cast<byte>(sizeof(Block) - leftoverBytes);			// NOTE This will guarantee 1 to sizeof(block) bytes are padded							
+	for (int i = 0; i < paddingCount; i++)												// NOTE The padded bytes are always just the pad length
+		plaintext.push_back(paddingCount);
 }
 
-// Removes padding by checking the last byte value. WANRNING, does not verify it was actually padded correctly.
-constexpr void aes::RemovePKCS7Padding(std::u8string& plaintext)
+// Removes padding by checking the last byte value, using the PKCS7 protocol. WANRNING, safely throws if it is not padded correctly.
+constexpr void aes::RemovePadding(std::vector<byte>& plaintext)
 {
 	// TODO ADD MORE SPECIFIC EXCEPTIONS
 
 	if (plaintext.empty()) throw;
 	if (plaintext.size() % sizeof(Block) != 0) throw;
-	
+
 	// Make sure it can actually unpadd properly
 	const int paddingCount = plaintext.back();
 	if (plaintext.size() <= paddingCount) throw;
-	if (sizeof(Block)	 < paddingCount) throw;
+	if (sizeof(Block) < paddingCount) throw;
 
 	// Each padding byte must be the very same
 	for (int i = 1; i <= paddingCount; i++)
@@ -307,7 +224,7 @@ TEST_CASE("aes-ShiftRows") {
 	};
 
 	Block temp = test1;
-	ShiftRows(temp);
+	aes::ShiftRows(temp);
 	CHECK(temp == test1res);
 }
 
@@ -320,7 +237,7 @@ TEST_CASE("aes-ShiftRowsInverse") {
 	};
 
 	Block temp = test1;
-	ShiftRowsInverse(temp);
+	aes::ShiftRowsInverse(temp);
 	CHECK(temp == test1res);
 }
 
@@ -356,7 +273,7 @@ TEST_CASE("aes-MixColumns") {
 		0x52, 0x9f, 0x16, 0xc2, 0x97, 0x86, 0x15, 0xca, 0xe0, 0x1a, 0xae, 0x54, 0xba, 0x1a, 0x26, 0x59
 	};
 	Block temp = test1;
-	MixColumns(temp);
+	aes::MixColumns(temp);
 	CHECK(temp == test1res);
 }
 
@@ -368,7 +285,7 @@ TEST_CASE("aes-MixColumnsInverse") {
 		0x09, 0x28, 0x7f, 0x47, 0x6f, 0x74, 0x6a, 0xbf, 0x2c, 0x4a, 0x62, 0x04, 0xda, 0x08, 0xe3, 0xee
 	};
 	Block temp = test1;
-	MixColumnsInverse(temp);
+	aes::MixColumnsInverse(temp);
 	CHECK(temp == test1res);
 }
 
@@ -380,85 +297,56 @@ TEST_CASE("aes-AddRoundKey") {
 
 TEST_CASE("aes-ApplyRemovePKCS7Padding") {
 	SUBCASE("Fill Remainder 1") {
-		std::u8string test = std::u8string(sizeof(Block) - 1, 0_b);
-		aes::ApplyPKCS7Padding(test);
+		std::vector<byte> test = std::vector<byte>(sizeof(Block) - 1, 0_b);
+		aes::ApplyPadding(test);
 		CHECK(test.size()	== sizeof(Block));
 		CHECK(test.front()	== 0_b);
 		CHECK(test.back()	== 1);
 		SUBCASE("Undo") {
-			aes::RemovePKCS7Padding(test);
-			CHECK(test == std::u8string(sizeof(Block) - 1, 0_b));
+			aes::RemovePadding(test);
+			CHECK(test == std::vector<byte>(sizeof(Block) - 1, 0_b));
 		}
 	}
 
 	SUBCASE("Fill Remainder 2") {
-		std::u8string test = std::u8string(sizeof(Block) - 2, 0_b);
-		aes::ApplyPKCS7Padding(test);
+		std::vector<byte> test = std::vector<byte>(sizeof(Block) - 2, 0_b);
+		aes::ApplyPadding(test);
 		CHECK(test.size()	== sizeof(Block));
 		CHECK(test.front()	== 0_b);
 		CHECK(test.back()	== 2);
 		SUBCASE("Undo") {
-			aes::RemovePKCS7Padding(test);
-			CHECK(test == std::u8string(sizeof(Block) - 2, 0_b));
+			aes::RemovePadding(test);
+			CHECK(test == std::vector<byte>(sizeof(Block) - 2, 0_b));
 		}
 	}
 
 	SUBCASE("Fill Single Byte") {
-		std::u8string test = std::u8string(1, 0_b);
-		aes::ApplyPKCS7Padding(test);
+		std::vector<byte> test = std::vector<byte>(1, 0_b);
+		aes::ApplyPadding(test);
 		CHECK(test.size()	== sizeof(Block));
 		CHECK(test.front()	== 0_b);
 		CHECK(test[2]		== sizeof(Block) - 1);
 		CHECK(test.back()	== sizeof(Block) - 1);
 		SUBCASE("Undo") {
-			aes::RemovePKCS7Padding(test);
-			CHECK(test == std::u8string(1, 0_b));
+			aes::RemovePadding(test);
+			CHECK(test == std::vector<byte>(1, 0_b));
 		}
 	}
 
 	SUBCASE("Append Full Block") {
-		std::u8string test = std::u8string(sizeof(Block), 0_b);
-		aes::ApplyPKCS7Padding(test);
+		std::vector<byte> test = std::vector<byte>(sizeof(Block), 0_b);
+		aes::ApplyPadding(test);
 		CHECK(test.size()				== 2 * sizeof(Block));
 		CHECK(test.front()				== 0_b);
 		CHECK(test[sizeof(Block) - 1]	== 0_b);
 		CHECK(test[sizeof(Block)]		== sizeof(Block));
 		CHECK(test.back()				== sizeof(Block));
 		SUBCASE("Undo") {
-			aes::RemovePKCS7Padding(test);
-			CHECK(test == std::u8string(sizeof(Block), 0_b));
+			aes::RemovePadding(test);
+			CHECK(test == std::vector<byte>(sizeof(Block), 0_b));
 		}
 	}
 
 }
 
-TEST_CASE("aes-Encrypt") {
-	// Test values verified using https://legacy.cryptool.org/en/cto/aes-step-by-step 
-	const SmallKey key = { 0x2b, 0x7e, 0x15, 0x16, 0x28 , 0xae , 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
-	const std::u8string plaintext = { 0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a};
-	const std::u8string expectedCiphertext = { 0x3a, 0xd7, 0x7b, 0xb4, 0x0d, 0x7a, 0x36, 0x60, 0xa8, 0x9e, 0xca, 0xf3, 0x24, 0x66, 0xef, 0x97 };
-	std::u8string res = aes::Encrypt(plaintext, key);
-	CHECK(res.size() == sizeof(Block));
-	CHECK(res == expectedCiphertext);
-}
 
-TEST_CASE("aes-Decrypt") {
-	// Test values verified using https://legacy.cryptool.org/en/cto/aes-step-by-step 
-	const SmallKey key =					{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
-	const std::u8string ciphertext =		{ 0xc7, 0xd1, 0x24, 0x19, 0x48, 0x9e, 0x3b, 0x62, 0x33, 0xa2, 0xc5, 0xa7, 0xf4, 0x56, 0x31, 0x72, };
-	const std::u8string expectedPlaintext = { 0x00, 0x00, 0x01, 0x01, 0x03, 0x03, 0x07, 0x07, 0x0f, 0x0f, 0x1f, 0x1f, 0x3f, 0x3f, 0x7f, 0x7f };
-	std::u8string res = aes::Decrypt(ciphertext, key);
-	CHECK(res.size() == sizeof(Block));
-	CHECK(res == expectedPlaintext);
-}
-
-TEST_CASE("aes-encrypt-then-decrypt") {
-	const SmallKey key = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
-	const std::u8string initialPlaintext = std::u8string(u8"Introduction to Computer Security");
-	std::u8string res = initialPlaintext;
-	aes::ApplyPKCS7Padding(res);
-	res = aes::Encrypt(res, key);
-	res = aes::Decrypt(res, key);
-	aes::RemovePKCS7Padding(res);
-	CHECK(res == initialPlaintext);
-}

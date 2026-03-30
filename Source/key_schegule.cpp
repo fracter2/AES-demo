@@ -71,14 +71,14 @@ namespace {
     
     constexpr Word KeyExpansionCore(Word prev, int roundIndex) noexcept
     {
-        prev = SubBytes(RotBytes(prev));
+        prev = LookupSBoxRange(RotBytes(prev));
         prev[0] ^= rcon(roundIndex);         // Since rcon always only affects the leftmost byte, this is simpler than making a whole Word for it.
         return prev;
     }
     
 }
 
-template<typename _FromKey, int roundKeyCount>
+template<typename _FromKey, int roundKeyCount> requires IsWordConvertable<_FromKey>
 constexpr std::array<RoundKey, roundKeyCount> CreateRoundKeys(const _FromKey& initKey) noexcept
 {
     using rKeyArray = std::array<RoundKey, roundKeyCount>;
@@ -97,7 +97,7 @@ constexpr std::array<RoundKey, roundKeyCount> CreateRoundKeys(const _FromKey& in
         const int roundI = i / N;
         const Word& prev = rWords[i - 1];
         if (i % N == 0)                 { rWords[i] = KeyExpansionCore(prev, roundI); }
-        else if (N > 6 && i % N == 4)   { rWords[i] = SubBytes(prev); }                      // NOTE Only active for LargeKeys
+        else if (N > 6 && i % N == 4)   { rWords[i] = LookupSBoxRange(prev); }                      // NOTE Only active for LargeKeys
         else                            { rWords[i] = prev; }
 
         const Word& keyOffsetW = rWords[i - N];
