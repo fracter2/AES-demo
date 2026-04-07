@@ -72,8 +72,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)External\raylib\include;$(SolutionDir)External\gsl-4.2.1;$(SolutionDir)External</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)External\raylib\lib;</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)External</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <CodeAnalysisRuleSet>CppCoreCheckGslRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -115,7 +115,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>raylib.lib;winmm.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -136,17 +136,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\aes.cpp" />
-    <ClCompile Include="Source\app.cpp" />
     <ClCompile Include="Source\key_schegule.cpp" />
     <ClCompile Include="Source\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="External\doctest.h" />
-    <ClInclude Include="External\raylib\include\raylib.h" />
-    <ClInclude Include="External\raylib\include\raymath.h" />
-    <ClInclude Include="External\raylib\include\rlgl.h" />
     <ClInclude Include="Source\aes.h" />
-    <ClInclude Include="Source\app.h" />
     <ClInclude Include="Source\common.h" />
     <ClInclude Include="Source\gmix.h" />
     <ClInclude Include="Source\key_shegule.h" />
@@ -156,13 +151,7 @@
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include="AESDemo.slnx" />
-    <None Include="External\raylib\lib\raylib.dll" />
-    <None Include="External\raylib\LICENSE" />
-    <None Include="External\raylib\README.md" />
     <None Include="README.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="External\raylib\lib\raylib.lib" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE.txt" />

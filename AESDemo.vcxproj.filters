@@ -18,9 +18,6 @@
     <ClCompile Include="Source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\app.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\aes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -29,18 +26,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\app.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="External\raylib\include\raylib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="External\raylib\include\raymath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="External\raylib\include\rlgl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\aes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -61,16 +46,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="External\raylib\lib\raylib.dll" />
     <None Include="AESDemo.slnx" />
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include="README.md" />
-    <None Include="External\raylib\LICENSE" />
-    <None Include="External\raylib\README.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="External\raylib\lib\raylib.lib" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE.txt" />
