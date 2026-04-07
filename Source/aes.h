@@ -64,7 +64,7 @@ namespace aes {
 		if (plaintext.empty()) throw;
 
 		// Copy plaintext
-		std::vector<byte> ciphertext(plaintext.size() * sizeof(plaintext.front()));
+		std::vector<byte> ciphertext(plaintext.size() * sizeof(*plaintext.data()));
 		std::copy(plaintext.begin(), plaintext.end(), ciphertext.begin());
 		ciphertext.reserve(sizeof(Block));		// + Block bytes to give space for padding
 		ApplyPadding(ciphertext);				// AES can only encrypt blocks of 128 bits, so we use PKCS7 padding to make it the right length.
@@ -89,7 +89,7 @@ namespace aes {
 		if (ciphertext.empty()) throw;
 
 		// Copy ciphertext
-		std::vector<byte> plaintext(ciphertext.size() * sizeof(ciphertext.front()));
+		std::vector<byte> plaintext(ciphertext.size() * sizeof(*ciphertext.data()));
 		std::copy(ciphertext.begin(), ciphertext.end(), plaintext.begin());
 
 		// Encryption loop
