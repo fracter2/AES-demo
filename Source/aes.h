@@ -71,7 +71,7 @@ namespace aes {
 
 		// Encryption loop
 		const auto roundKeys = GetRoundKeys(key);
-		const int blockCount = ciphertext.size() / sizeof(Block);			// TODO Convert to Block array (for clarity)
+		const int blockCount = ciphertext.size() / sizeof(Block);
 		Block* blocksPtr = std::bit_cast<Block*>(ciphertext.data());
 		for (int i = 0; i < blockCount; i++) {
 			Block& block = *(blocksPtr + i);
@@ -94,7 +94,7 @@ namespace aes {
 
 		// Encryption loop
 		const auto roundKeys = GetRoundKeys(key);
-		const int blockCount = plaintext.size() / sizeof(Block);			// TODO Convert to Block array (for clarity)
+		const int blockCount = plaintext.size() / sizeof(Block);
 		Block* blocksPtr = std::bit_cast<Block*>(plaintext.data());
 		for (int i = 0; i < blockCount; i++) {
 			Block& block = *(blocksPtr + i);

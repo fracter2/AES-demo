@@ -23,17 +23,12 @@ namespace {
             r[i] = *(words + i);
         }
 
-        // TODO TRY
-        //const std::array<Word, WordCount<T>()>* r_ptr = reinterpret_cast<const std::array<Word, WordCount<T>()>>(&var);
-        //return std::array<Word, WordCount<T>()> { *r_ptr };
-
         return r;
     }
 
 
-
     // -- Code taken from samiam.org/key-schedule.html --
-    constexpr byte rcon(int in) noexcept                    // TODO Consider range-enforced variant (like byte)
+    constexpr byte rcon(int in) noexcept
     { 
         assert(in >= 0);
         

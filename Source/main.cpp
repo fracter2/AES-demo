@@ -20,16 +20,15 @@
 *   Copyright (c) 2013-2022 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
-
-// This project is an implementation of AES by Theodor Rydberg (github.com/fracter2).
-
-
 #include "aes.h"
 #include <print>
 
 #define DOCTEST_CONFIG_IMPLEMENT
 #include <doctest.h>
 
+/*
+* This project is an implementation of AES by Theodor Rydberg (github.com / fracter2).
+*/ 
 
 int main(int argc, char** argv)
 {

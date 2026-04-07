@@ -9,7 +9,7 @@
 #include <ranges>
 
 
-using byte = unsigned char;									// TODO CONSIDER MOVING BYTE UTIL TO DEDICATED byte FILE
+using byte = unsigned char;
 using Word = std::array<byte, 4>;
 using Block = std::array<byte, 16>;
 using RoundKey = Block;
