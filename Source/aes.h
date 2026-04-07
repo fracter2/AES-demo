@@ -57,16 +57,8 @@ namespace aes {
 		AddRoundKey(block, keys[0]);
 	}
 
-	template<typename T>
-	concept IsSequenceContainer = requires(T t) {
-		requires std::ranges::contiguous_range<T>;
-		{ t.size() } -> std::same_as<std::size_t>;
-	};
-	static_assert(IsSequenceContainer<std::vector<byte>>);
-	static_assert(IsSequenceContainer<std::u8string>);
-
 	// Get the ciphertext of the given byte sequence, using AES in ECB mode with PKCS7 Padding.
-	template <IsSequenceContainer T>
+	template <std::ranges::contiguous_range T>
 	constexpr std::vector<byte> EncryptRange(const T& plaintext, const SmallKey& key)
 	{
 		if (plaintext.empty()) throw;
@@ -89,7 +81,7 @@ namespace aes {
 		return ciphertext;
 	}
 
-	template<IsSequenceContainer T>
+	template<std::ranges::contiguous_range T>
 	constexpr std::vector<byte> DecryptRange(const T& ciphertext, const SmallKey& key)
 	{
 
