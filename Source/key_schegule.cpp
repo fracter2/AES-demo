@@ -4,18 +4,18 @@
 
 namespace {
     template<typename T>
-    concept IsWordConvertable = requires (T t) {
-        sizeof(T) % sizeof(Word) != 0;
-    };
+    concept IsWordConvertable = sizeof(T) % sizeof(Word) == 0;
 
-    template<typename T> requires IsWordConvertable<T>
+    static_assert(IsWordConvertable<SmallKey>);
+
+    template<IsWordConvertable T>
     constexpr int WordCount()
     {
         return sizeof(T) / sizeof(Word);
     }
 
-    template <typename T> requires IsWordConvertable<T>
-    constexpr std::array<Word, WordCount<T>()> VarToWords(const T& var) noexcept        // TODO Consider renaming to "ToWords()" inside a namespace
+    template <IsWordConvertable T>
+    constexpr std::array<Word, WordCount<T>()> ToWords(const T& var) noexcept
     {
         std::array<Word, WordCount<T>()> r;
         const Word* const words = reinterpret_cast<const Word*>(&var);
@@ -86,7 +86,7 @@ constexpr std::array<RoundKey, roundKeyCount> CreateRoundKeys(const _FromKey& in
     rWordArray rWords;
 
     // The first words are always just the initial key
-    const auto initKW = VarToWords(initKey);
+    const auto initKW = ToWords(initKey);
     const int N = initKW.size();                        // Small = 4, Medium = 6, Large = 8
     for (int i = 0; i < N; i++) {
         rWords[i] = initKW[i];
