@@ -75,17 +75,15 @@ constexpr void aes::AddRoundKey(Block& block, const RoundKey& key) noexcept
 constexpr void aes::ApplyPadding(std::vector<byte>& plaintext)
 {
 	const int leftoverBytes = plaintext.size() % sizeof(Block);
-	const byte paddingCount = static_cast<byte>(sizeof(Block) - leftoverBytes);			// NOTE This will guarantee 1 to sizeof(block) bytes are padded							
-	for (int i = 0; i < paddingCount; i++)												// NOTE The padded bytes are always just the pad length
+	const byte paddingCount = static_cast<byte>(sizeof(Block) - leftoverBytes);			// NOTE This will guarantee that at least 1 (up to sizeof(block)) bytes are padded							
+	for (int i = 0; i < paddingCount; i++)												// NOTE The padded bytes value are always just the pad length
 		plaintext.push_back(paddingCount);
 }
 
 // Removes padding by checking the last byte value, using the PKCS7 protocol. WANRNING, safely throws if it is not padded correctly.
 constexpr void aes::RemovePadding(std::vector<byte>& plaintext)
 {
-	// TODO ADD MORE SPECIFIC EXCEPTIONS
-
-	if (plaintext.empty()) throw;
+	if (plaintext.empty()) throw;														// TODO ADD MORE SPECIFIC EXCEPTIONS
 	if (plaintext.size() % sizeof(Block) != 0) throw;
 
 	// Make sure it can actually unpadd properly
