@@ -144,6 +144,7 @@
     <ClInclude Include="Source\aes.h" />
     <ClInclude Include="Source\common.h" />
     <ClInclude Include="Source\gmix.h" />
+    <ClInclude Include="Source\hex_conversion.h" />
     <ClInclude Include="Source\key_shegule.h" />
     <ClInclude Include="Source\sbox.h" />
   </ItemGroup>
