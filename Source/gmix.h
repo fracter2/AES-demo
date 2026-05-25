@@ -83,7 +83,7 @@ constexpr std::array<byte, 256> GMulBy14{
 constexpr Word GMixColumn(const Word& in) noexcept
 {
 	Word b;					// is each element of the input bytes multiplied by 2 in Rijndael's Galois field
-	byte h;		// is high bit
+	byte h;					// is high bit
 	for (int i = 0; i < 4; i++) {
 		/* h is set to 0x01 if the high bit of in[c] is set, 0x00 otherwise */
 		h = in[i] >> 7;		/* logical right shift, thus shifting in zeros */

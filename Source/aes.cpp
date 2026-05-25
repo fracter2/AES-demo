@@ -6,7 +6,7 @@
 
 constexpr void aes::ShiftRows(Block& block) noexcept
 {
-	// NOTE Start at 1 since 0 doesn't do anything anyway
+	// NOTE Start at 1 since shifting by 0 doesn't do anything anyway
 	for (int i = 1; i < 4; i++) {
 		Word row = { block[i], block[i + 4], block[i + 8], block[i + 12] };
 		std::rotate(row.begin(), row.begin() + i, row.end());
@@ -15,12 +15,11 @@ constexpr void aes::ShiftRows(Block& block) noexcept
 		block[i + 8] = row[2];
 		block[i + 12] = row[3];
 	}
-
 }
 
 constexpr void aes::ShiftRowsInverse(Block& block) noexcept
 {
-	// NOTE Start at 1 since 0 doesn't do anything anyway
+	// NOTE Start at 1 since shifting by 0 doesn't do anything anyway
 	for (int i = 1; i < 4; i++) {
 		Word row = { block[i], block[i + 4], block[i + 8], block[i + 12] };
 		std::rotate(row.begin(), row.begin() + (4 - i), row.end());
@@ -29,7 +28,6 @@ constexpr void aes::ShiftRowsInverse(Block& block) noexcept
 		block[i + 8] = row[2];
 		block[i + 12] = row[3];
 	}
-
 }
 
 constexpr void aes::MixColumns(Block& block) noexcept
@@ -86,17 +84,14 @@ constexpr void aes::RemovePadding(std::vector<byte>& plaintext)
 	if (plaintext.empty()) throw;														// TODO ADD MORE SPECIFIC EXCEPTIONS
 	if (plaintext.size() % sizeof(Block) != 0) throw;
 
-	// Make sure it can actually unpadd properly
-	const int paddingCount = plaintext.back();
+	const int paddingCount = plaintext.back();											// NOTE PKCS7, the padd-bytes are each the same value as the padd-length
 	if (plaintext.size() <= paddingCount) throw;
 	if (sizeof(Block) < paddingCount) throw;
 
-	// Each padding byte must be the very same
-	for (int i = 1; i <= paddingCount; i++)
+	for (int i = 1; i <= paddingCount; i++)												// Each padding byte should be the same, altough it's not nessessary.
 		if (plaintext[plaintext.size() - i] != paddingCount)
 			throw;
 
-	// Actually unpadd
 	for (int i = 0; i < paddingCount; i++)
 		plaintext.pop_back();
 }

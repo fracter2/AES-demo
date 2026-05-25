@@ -20,7 +20,7 @@ namespace aes {
 	template <std::size_t size>
 	constexpr void EncryptBlock(Block& block, const std::array<RoundKey, size>& keys) noexcept
 	{
-		// First round only
+		// First round
 		AddRoundKey(block, keys[0]);
 
 		// Most rounds
@@ -31,7 +31,7 @@ namespace aes {
 			AddRoundKey(block, keys[i]);
 		}
 
-		// Final round only
+		// Final round
 		SubBytes(block);
 		ShiftRows(block);
 		AddRoundKey(block, keys.back());
@@ -40,8 +40,8 @@ namespace aes {
 	template <std::size_t size>
 	constexpr void DecryptBlock(Block& block, const std::array<RoundKey, size>& keys) noexcept
 	{
-		// Final round only
-		AddRoundKey(block, keys.back());
+		// Final round
+		AddRoundKey(block, keys.back());	// Inverse of AddRoundKey() is still AddRoundKey()
 		ShiftRowsInverse(block);
 		SubBytesInverse(block);
 
@@ -53,7 +53,7 @@ namespace aes {
 			SubBytesInverse(block);
 		}
 
-		// First round only
+		// First round
 		AddRoundKey(block, keys[0]);
 	}
 
@@ -66,7 +66,7 @@ namespace aes {
 		// Copy plaintext
 		std::vector<byte> ciphertext(plaintext.size() * sizeof(*plaintext.data()));
 		std::copy(plaintext.begin(), plaintext.end(), ciphertext.begin());
-		ciphertext.reserve(sizeof(Block));		// + Block bytes to give space for padding
+		ciphertext.reserve(sizeof(Block));		// + 1 Block of bytes to give space for padding
 		ApplyPadding(ciphertext);				// AES can only encrypt blocks of 128 bits, so we use PKCS7 padding to make it the right length.
 
 		// Encryption loop
