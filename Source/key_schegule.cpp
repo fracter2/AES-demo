@@ -28,7 +28,7 @@ namespace {
 
 
     // -- Code taken from samiam.org/key-schedule.html --
-    constexpr byte rcon(int in) noexcept
+    constexpr byte GetRoundConst(int in) noexcept
     { 
         assert(in >= 0);
         
@@ -52,22 +52,22 @@ namespace {
 
     // Test values taken from wiki page on AES_key_schedule
     TEST_CASE("Key-Schedule-rcon-typicaluse") {
-        CHECK(rcon(1) == 0x01);
-        CHECK(rcon(2) == 0x02);
-        CHECK(rcon(3) == 0x04);
-        CHECK(rcon(4) == 0x08);
-        CHECK(rcon(5) == 0x10);
-        CHECK(rcon(6) == 0x20);
-        CHECK(rcon(7) == 0x40);
-        CHECK(rcon(8) == 0x80);
-        CHECK(rcon(9) == 0x1B);
-        CHECK(rcon(10) == 0x36);
+        CHECK(GetRoundConst(1) == 0x01);
+        CHECK(GetRoundConst(2) == 0x02);
+        CHECK(GetRoundConst(3) == 0x04);
+        CHECK(GetRoundConst(4) == 0x08);
+        CHECK(GetRoundConst(5) == 0x10);
+        CHECK(GetRoundConst(6) == 0x20);
+        CHECK(GetRoundConst(7) == 0x40);
+        CHECK(GetRoundConst(8) == 0x80);
+        CHECK(GetRoundConst(9) == 0x1B);
+        CHECK(GetRoundConst(10) == 0x36);
     }
     
     constexpr Word KeyExpansionCore(Word prev, int roundIndex) noexcept
     {
         prev = LookupSBoxRange(RotBytes(prev));
-        prev[0] ^= rcon(roundIndex);         // Since rcon always only affects the leftmost byte, this is simpler than making a whole Word for it.
+        prev[0] ^= GetRoundConst(roundIndex);         // Since rcon always only affects the leftmost byte, this is simpler than making a whole Word for it.
         return prev;
     }
     
